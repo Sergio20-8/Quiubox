@@ -12,10 +12,7 @@
 }
 
 .qb-h2 {
-  font-size: 1rem;
-  color: var(--qb-accent);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 0 0 1rem;
 }
 
 .qb-sev-block {
@@ -37,13 +34,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0;
+  gap: 0.65rem;
+  padding: 0.65rem 0;
   border-bottom: 1px solid var(--qb-border);
 }
 
 .qb-cve {
   color: var(--qb-muted);
+  font-family: var(--qb-mono);
   font-size: 0.8rem;
 }
 

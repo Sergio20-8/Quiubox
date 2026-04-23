@@ -1,17 +1,72 @@
-<mat-toolbar color="primary" class="qb-toolbar">
-  <span class="qb-brand">Quiubox</span>
-  <span class="qb-spacer"></span>
-  <a mat-button routerLink="/dashboard" routerLinkActive="active">Panel</a>
-  <a mat-button routerLink="/scans" routerLinkActive="active">Escaneos</a>
-  <a mat-button routerLink="/results" routerLinkActive="active">Resultados</a>
-  @if (auth.isAdmin()) {
-    <a mat-button routerLink="/admin/users" routerLinkActive="active">Usuarios</a>
-  }
-  <span class="qb-user">{{ auth.user()?.username }}</span>
-  <button mat-icon-button type="button" (click)="logout()" aria-label="Cerrar sesión">
-    <mat-icon>logout</mat-icon>
-  </button>
-</mat-toolbar>
-<main class="qb-main">
-  <router-outlet />
-</main>
+<mat-sidenav-container class="qb-shell relative overflow-hidden">
+  <mat-sidenav
+    class="qb-sidebar"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="menuOpen()"
+    [fixedInViewport]="isMobile()"
+    (openedChange)="menuOpen.set($event)"
+  >
+    <aside class="qb-sidebar-content" aria-label="Menú principal">
+      <div class="qb-sidebar-header">
+        <div class="qb-brand-block">
+          <span class="qb-brand-mark">Q</span>
+          <span class="qb-brand-copy">
+            <span class="qb-brand">Quiubox</span>
+            <span class="qb-brand-subtitle">Security panel</span>
+          </span>
+        </div>
+        <button mat-icon-button type="button" class="qb-close-menu" (click)="toggleMenu()" aria-label="Ocultar sidebar">
+          <mat-icon>{{ isMobile() ? 'close' : 'keyboard_double_arrow_left' }}</mat-icon>
+        </button>
+      </div>
+
+      <nav class="qb-nav" aria-label="Navegación principal">
+        <a
+          *ngFor="let item of navItems"
+          class="qb-nav-link"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+          [class.qb-hidden]="item.adminOnly && !auth.isAdmin()"
+          (click)="closeMenuOnMobile()"
+        >
+          <span class="qb-nav-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </span>
+          <span class="qb-nav-label">{{ item.label }}</span>
+        </a>
+      </nav>
+
+      <div class="qb-sidebar-footer">
+        <div class="qb-user">
+          <span class="qb-user-avatar">{{ auth.user()?.username?.charAt(0)?.toUpperCase() }}</span>
+          <span class="qb-user-name">{{ auth.user()?.username }}</span>
+        </div>
+        <button type="button" class="qb-logout" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="qb-content">
+    @if (!isMobile() && !menuOpen()) {
+      <button mat-button type="button" class="qb-desktop-toggle shadow-2xl" (click)="toggleMenu()" aria-label="Mostrar sidebar">
+        <mat-icon>keyboard_double_arrow_right</mat-icon>
+        <span>Menú</span>
+      </button>
+    }
+
+    <header class="qb-mobile-bar">
+      <button mat-icon-button type="button" (click)="toggleMenu()" aria-label="Abrir menú">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="qb-brand">Quiubox</span>
+    </header>
+
+    <main class="qb-main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

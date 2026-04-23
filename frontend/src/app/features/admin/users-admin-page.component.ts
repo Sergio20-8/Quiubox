@@ -1,14 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
-import type { Role, User } from '../../core/models/domain.models';
+import type { User } from '../../core/models/domain.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { UsersApiService } from '../../core/services/users-api.service';
 import { UserCreateDialogComponent } from './user-create-dialog.component';
@@ -18,13 +16,10 @@ import { UserCreateDialogComponent } from './user-create-dialog.component';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
     MatCardModule,
     MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    MatIconModule,
+    MatMenuModule,
     MatButtonModule,
     MatTableModule,
   ],
@@ -37,16 +32,6 @@ export class UsersAdminPageComponent {
   private readonly notifications = inject(NotificationService);
 
   users: User[] = [];
-  roleDraft: Record<string, Role> = {};
-  editingUserId: string | null = null;
-
-  editForm = {
-    nombres: '',
-    apellidos: '',
-    email: '',
-    role: 'user' as Role,
-  };
-
   readonly displayedColumns = ['username', 'nombres', 'apellidos', 'email', 'role', 'actions'];
 
   constructor() {
@@ -56,13 +41,6 @@ export class UsersAdminPageComponent {
   reload(): void {
     this.usersApi.listUsers().subscribe((list) => {
       this.users = list;
-      this.roleDraft = {};
-      for (const u of list) {
-        this.roleDraft[u.id] = u.role;
-      }
-      if (this.editingUserId && !list.some((u) => u.id === this.editingUserId)) {
-        this.cancelEdit();
-      }
     });
   }
 
@@ -70,6 +48,7 @@ export class UsersAdminPageComponent {
     const ref = this.dialog.open(UserCreateDialogComponent, {
       autoFocus: false,
       panelClass: 'qb-dialog-panel',
+      data: { mode: 'create' },
     });
 
     ref.afterClosed().subscribe((created) => {
@@ -81,46 +60,28 @@ export class UsersAdminPageComponent {
     });
   }
 
-  startEdit(user: User): void {
-    this.editingUserId = user.id;
-    this.editForm.nombres = user.nombres;
-    this.editForm.apellidos = user.apellidos;
-    this.editForm.email = user.email;
-    this.editForm.role = user.role;
-  }
-
-  cancelEdit(): void {
-    this.editingUserId = null;
-    this.editForm = {
-      nombres: '',
-      apellidos: '',
-      email: '',
-      role: 'user',
-    };
-  }
-
-  updateSelectedUser(): void {
-    if (!this.editingUserId) {
-      return;
-    }
-    this.usersApi.updateUser(this.editingUserId, this.editForm).subscribe(() => {
-      this.notifications.success('Usuario actualizado');
-      this.cancelEdit();
-      this.reload();
+  openViewDialog(user: User): void {
+    this.dialog.open(UserCreateDialogComponent, {
+      autoFocus: false,
+      panelClass: 'qb-dialog-panel',
+      data: { mode: 'view', user },
     });
   }
 
-  saveRole(user: User): void {
-    const role = this.roleDraft[user.id];
-    if (!role || role === user.role) {
-      return;
-    }
-    this.usersApi
-      .updateUser(user.id, { nombres: user.nombres, apellidos: user.apellidos, email: user.email, role })
-      .subscribe(() => {
-        this.notifications.success('Rol actualizado');
-        this.reload();
-      });
+  openEditDialog(user: User): void {
+    const ref = this.dialog.open(UserCreateDialogComponent, {
+      autoFocus: false,
+      panelClass: 'qb-dialog-panel',
+      data: { mode: 'edit', user },
+    });
+
+    ref.afterClosed().subscribe((updated) => {
+      if (!updated) {
+        return;
+      }
+      this.notifications.success('Usuario actualizado');
+      this.reload();
+    });
   }
 
   remove(user: User): void {
@@ -131,5 +92,9 @@ export class UsersAdminPageComponent {
       this.notifications.success('Usuario eliminado');
       this.reload();
     });
+  }
+
+  roleLabel(user: User): string {
+    return user.role === 'admin' ? 'Administrador' : 'Usuario';
   }
 }

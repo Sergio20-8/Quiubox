@@ -1,36 +1,60 @@
 .qb-stack {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.9rem;
 }
 
 .qb-h2 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--qb-accent);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 0;
 }
 
-.qb-form-row {
+.qb-actions-card {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
   align-items: center;
+  justify-content: flex-start;
+  gap: 0.9rem;
+  flex-wrap: wrap;
 }
 
-.qb-form-wrap {
-  align-items: flex-end;
-}
-
-mat-form-field {
-  min-width: 220px;
+.qb-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
 }
 
 .qb-table {
   width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(148, 255, 214, 0.08);
+  border-radius: 12px;
 }
 
 .qb-muted {
   color: var(--qb-muted);
+}
+
+.qb-dialog {
+  padding: 1rem;
+}
+
+.qb-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.qb-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .qb-actions,
+  .qb-actions button {
+    width: 100%;
+  }
 }

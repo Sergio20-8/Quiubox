@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, TemplateRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -21,6 +22,7 @@ import { ScansApiService } from '../../core/services/scans-api.service';
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -35,6 +37,7 @@ export class ScansPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly scansApi = inject(ScansApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
 
   readonly manualForm = this.fb.nonNullable.group({
     target: ['', [Validators.required]],
@@ -57,6 +60,20 @@ export class ScansPageComponent implements OnInit {
   private readonly refresh$ = new Subject<void>();
 
   readonly displayedColumns = ['target', 'scanType', 'status', 'startedAt', 'finishedAt', 'counts'];
+
+  openManualDialog(template: TemplateRef<unknown>): void {
+    this.dialog.open(template, {
+      width: 'min(440px, calc(100vw - 2rem))',
+      panelClass: 'qb-dialog-panel',
+    });
+  }
+
+  openScheduleDialog(template: TemplateRef<unknown>): void {
+    this.dialog.open(template, {
+      width: 'min(560px, calc(100vw - 2rem))',
+      panelClass: 'qb-dialog-panel',
+    });
+  }
 
   ngOnInit(): void {
     this.scansApi.listSchedules().subscribe((s) => (this.schedules = s));
@@ -86,6 +103,7 @@ export class ScansPageComponent implements OnInit {
     this.scansApi.startScan({ target, scanType }).subscribe({
       next: () => {
         this.starting = false;
+        this.dialog.closeAll();
         this.refresh$.next();
       },
       error: () => {
@@ -112,6 +130,7 @@ export class ScansPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.scheduling = false;
+          this.dialog.closeAll();
           this.scansApi.listSchedules().subscribe((s) => (this.schedules = s));
           this.scheduleForm.reset({
             target: '',

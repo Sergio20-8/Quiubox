@@ -1,18 +1,20 @@
 .qb-filters {
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .qb-filter-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.qb-filter-row mat-form-field {
+  flex: 1 1 210px;
 }
 
 .qb-h2 {
   margin: 0;
-  font-size: 1rem;
-  color: var(--qb-accent);
 }
 
 .qb-pdf-header {
@@ -26,6 +28,9 @@
 
 .qb-table {
   width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(148, 255, 214, 0.08);
+  border-radius: 12px;
 }
 
 .qb-muted {

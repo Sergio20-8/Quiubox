@@ -1,32 +1,40 @@
 <div class="qb-dialog-shell">
   <div class="qb-dialog-hero">
-    <p class="qb-panel-title">Nuevo usuario</p>
-    <h2>Crear cuenta</h2>
-    <p class="qb-soft">Registra un usuario nuevo con acceso al sistema y define su rol desde aquí.</p>
+    <span class="qb-dialog-mark">Q</span>
+    <div>
+      <p class="qb-panel-title">Usuarios</p>
+      <h2>{{ title() }}</h2>
+    </div>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="qb-dialog-form">
-    <mat-form-field appearance="outline" class="full">
+    <mat-form-field appearance="outline">
       <mat-label>Usuario</mat-label>
       <input matInput formControlName="username" autocomplete="off" />
     </mat-form-field>
-    <mat-form-field appearance="outline" class="full">
+    <mat-form-field appearance="outline">
       <mat-label>Nombres</mat-label>
       <input matInput formControlName="nombres" autocomplete="off" />
     </mat-form-field>
-    <mat-form-field appearance="outline" class="full">
+    <mat-form-field appearance="outline">
       <mat-label>Apellidos</mat-label>
       <input matInput formControlName="apellidos" autocomplete="off" />
     </mat-form-field>
-    <mat-form-field appearance="outline" class="full">
+    <mat-form-field appearance="outline">
       <mat-label>Correo</mat-label>
       <input matInput type="email" formControlName="email" />
     </mat-form-field>
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Contraseña</mat-label>
-      <input matInput type="password" formControlName="password" autocomplete="new-password" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full">
+    @if (isCreateMode()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="new-password" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmar contraseña</mat-label>
+        <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+      </mat-form-field>
+    }
+    <mat-form-field appearance="outline" class="qb-role-field">
       <mat-label>Rol</mat-label>
       <mat-select formControlName="role">
         <mat-option value="user">Usuario</mat-option>
@@ -35,14 +43,16 @@
     </mat-form-field>
 
     @if (errorMessage) {
-      <p class="qb-error">{{ errorMessage }}</p>
+      <p class="qb-error qb-form-message">{{ errorMessage }}</p>
     }
 
     <div class="qb-dialog-actions">
       <button mat-button type="button" (click)="close()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading">
-        {{ loading ? 'Creando…' : 'Crear usuario' }}
-      </button>
+      @if (!isViewMode()) {
+        <button mat-flat-button color="primary" type="submit" [disabled]="loading">
+          {{ actionLabel() }}
+        </button>
+      }
     </div>
   </form>
 </div>

@@ -1,14 +1,25 @@
+.kpi {
+  min-height: 8.75rem;
+}
+
 .kpi h2 {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--qb-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--qb-muted);
-  font-weight: 400;
+  font-weight: 800;
 }
 
 .kpi-value {
   margin: 0;
-  font-size: 2rem;
+  font-family: var(--qb-mono);
+  font-size: clamp(2.4rem, 7vw, 3.65rem);
+  font-weight: 900;
+  line-height: 0.92;
   color: var(--qb-accent);
+  text-shadow: 0 0 26px rgba(124, 255, 200, 0.24);
 }
 
 .kpi.critical .kpi-value {
@@ -24,7 +35,17 @@
 }
 
 .qb-mt {
-  margin-top: 1rem;
+  margin-top: 1.1rem;
+}
+
+.qb-mt p {
+  margin: 0;
+  color: var(--qb-muted);
+}
+
+.qb-mt strong {
+  color: var(--qb-text);
+  font-family: var(--qb-mono);
 }
 
 .qb-error {
