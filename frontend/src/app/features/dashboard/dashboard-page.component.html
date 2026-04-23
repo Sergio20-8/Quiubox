@@ -1,39 +1,146 @@
 <div class="qb-page">
-  <h1 class="qb-panel-title">Panel de resumen</h1>
+  <div class="dashboard-header">
+    <div>
+      <h1 class="qb-panel-title">Panel de resumen</h1>
+      <p class="dashboard-subtitle">Estado general de escaneos, hallazgos y actividad reciente.</p>
+    </div>
+    <div class="dashboard-actions">
+      <a mat-flat-button color="primary" routerLink="/scans">Nuevo escaneo</a>
+      <button mat-stroked-button type="button" (click)="load()" [disabled]="loading">Actualizar</button>
+    </div>
+  </div>
+
   @if (error) {
     <p class="qb-error">{{ error }}</p>
   }
-  @if (stats) {
-    <div class="qb-grid">
-      <mat-card class="qb-card kpi">
-        <h2>Total hallazgos</h2>
-        <p class="kpi-value">{{ stats.totalVulnerabilities }}</p>
-      </mat-card>
-      <mat-card class="qb-card kpi critical">
-        <h2>Críticas / altas</h2>
-        <p class="kpi-value">{{ stats.critical }}</p>
-      </mat-card>
-      <mat-card class="qb-card kpi medium">
-        <h2>Medias</h2>
-        <p class="kpi-value">{{ stats.medium }}</p>
-      </mat-card>
-      <mat-card class="qb-card kpi low">
-        <h2>Bajas</h2>
-        <p class="kpi-value">{{ stats.low }}</p>
-      </mat-card>
-    </div>
-    <mat-card class="qb-card qb-mt">
-      <p>
-        Último escaneo:
-        @if (stats.lastScanAt) {
-          <strong>{{ stats.lastScanAt | date: 'medium' }}</strong>
-          @if (stats.lastScanId) {
-            — <a class="qb-link" [routerLink]="['/results', stats.lastScanId]">Ver detalle</a>
-          }
-        } @else {
-          <span>Sin datos</span>
-        }
-      </p>
+
+  @if (loading && !stats) {
+    <mat-card class="qb-card loading-card">
+      <mat-spinner diameter="36" />
+      <span>Cargando métricas...</span>
     </mat-card>
+  } @else if (stats) {
+    <section class="kpi-grid">
+      <mat-card class="qb-card kpi total">
+        <span class="kpi-label">Hallazgos</span>
+        <strong class="kpi-value">{{ stats.totalVulnerabilities }}</strong>
+        <span class="kpi-foot">Registrados en resultados</span>
+      </mat-card>
+
+      <mat-card class="qb-card kpi critical">
+        <span class="kpi-label">Críticas / altas</span>
+        <strong class="kpi-value">{{ stats.critical }}</strong>
+        <span class="kpi-foot">{{ riskPercent(stats.critical) }}% del total</span>
+      </mat-card>
+
+      <mat-card class="qb-card kpi medium">
+        <span class="kpi-label">Medias</span>
+        <strong class="kpi-value">{{ stats.medium }}</strong>
+        <span class="kpi-foot">{{ riskPercent(stats.medium) }}% del total</span>
+      </mat-card>
+
+      <mat-card class="qb-card kpi low">
+        <span class="kpi-label">Bajas</span>
+        <strong class="kpi-value">{{ stats.low }}</strong>
+        <span class="kpi-foot">{{ riskPercent(stats.low) }}% del total</span>
+      </mat-card>
+    </section>
+
+    <section class="dashboard-grid">
+      <mat-card class="qb-card summary-card">
+        <h2 class="section-title">Estado operativo</h2>
+        <div class="summary-list">
+          <div>
+            <span>Total de escaneos</span>
+            <strong>{{ totalScans }}</strong>
+          </div>
+          <div>
+            <span>Finalizados</span>
+            <strong>{{ completedScans.length }}</strong>
+          </div>
+          <div>
+            <span>En proceso</span>
+            <strong>{{ activeScans.length }}</strong>
+          </div>
+        </div>
+
+        <div class="last-scan">
+          <span>Último escaneo finalizado</span>
+          @if (stats.lastScanAt) {
+            <strong>{{ stats.lastScanAt | date: 'medium' }}</strong>
+            @if (stats.lastScanId) {
+              <a class="qb-link" [routerLink]="['/results', stats.lastScanId]">Ver detalle</a>
+            }
+          } @else {
+            <strong>Sin datos</strong>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="qb-card risk-card">
+        <h2 class="section-title">Distribución de riesgo</h2>
+        <div class="risk-row critical">
+          <span>Críticas / altas</span>
+          <div class="risk-track"><div [style.width.%]="riskPercent(stats.critical)"></div></div>
+          <strong>{{ stats.critical }}</strong>
+        </div>
+        <div class="risk-row medium">
+          <span>Medias</span>
+          <div class="risk-track"><div [style.width.%]="riskPercent(stats.medium)"></div></div>
+          <strong>{{ stats.medium }}</strong>
+        </div>
+        <div class="risk-row low">
+          <span>Bajas</span>
+          <div class="risk-track"><div [style.width.%]="riskPercent(stats.low)"></div></div>
+          <strong>{{ stats.low }}</strong>
+        </div>
+      </mat-card>
+    </section>
+
+    <section class="dashboard-grid">
+      <mat-card class="qb-card activity-card">
+        <div class="section-header">
+          <h2 class="section-title">Escaneos activos</h2>
+          <a class="qb-link" routerLink="/scans">Ver escaneos</a>
+        </div>
+        @if (activeScans.length === 0) {
+          <p class="empty-state">No hay escaneos en ejecución.</p>
+        } @else {
+          <div class="scan-list">
+            @for (scan of activeScans; track scan.id) {
+              <div class="scan-item active">
+                <mat-spinner diameter="18" />
+                <div>
+                  <strong>{{ scan.target }}</strong>
+                  <span>{{ scanTypeLabel(scan.scanType) }} · {{ statusLabel(scan.status) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+
+      <mat-card class="qb-card activity-card">
+        <div class="section-header">
+          <h2 class="section-title">Actividad reciente</h2>
+          <a class="qb-link" routerLink="/results">Ver resultados</a>
+        </div>
+        @if (recentScans.length === 0) {
+          <p class="empty-state">No hay actividad registrada.</p>
+        } @else {
+          <div class="scan-list">
+            @for (scan of recentScans; track scan.id) {
+              <div class="scan-item">
+                <div>
+                  <strong>{{ scan.target }}</strong>
+                  <span>{{ scanTypeLabel(scan.scanType) }} · {{ statusLabel(scan.status) }}</span>
+                </div>
+                <small>{{ scan.startedAt | date: 'short' }}</small>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+    </section>
   }
 </div>
