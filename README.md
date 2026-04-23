@@ -18,4 +18,5 @@ Plataforma de gestion de vulnerabilidades en redes y servidores.
 
 - [Estrategia de escaneos](README_ESTRATEGIA_ESCANEOS.md)
 - [Arquitectura](ARQUITECTURA.md)
+- [Instalacion completa](README_INSTALACION.md)
 - [Requerimientos](Requerimientos.md)
